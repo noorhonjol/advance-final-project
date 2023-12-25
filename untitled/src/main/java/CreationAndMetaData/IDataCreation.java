@@ -1,12 +1,14 @@
 package CreationAndMetaData;
 
+import org.bson.Document;
+
 import java.util.List;
 
 public interface IDataCreation {
 
     void requestToCollectData(String userName);//this produce Event
 
-    List<Object> getMetaData();
+    List<Document> getMetaData();
 
     /*
         get data from all services and save the meta of data that want to save it
