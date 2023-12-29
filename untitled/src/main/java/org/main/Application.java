@@ -43,13 +43,8 @@ public class Application {
 
         logger.info("Application Started: ");
         //TODO Your application starts here. Do not Change the existing code
-
         IDataBase database=MongoDBSingleton.getInstance();
-//        Document newUser = new Document("username", "john_doe")
-//                .append("email", "john@example.com")
-//                .append("name", "John Doe");
-//        database.insert("advance-course", "test", newUser);
-        var res=database.findByUsername("admin","zeft","");
+
         //TODO Your application ends here. Do not Change the existing code
         logger.info("Application Ended: ");
     }
