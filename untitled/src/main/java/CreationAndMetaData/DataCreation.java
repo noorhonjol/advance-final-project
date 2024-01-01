@@ -26,9 +26,10 @@ public class DataCreation implements IDataCreation {
         this.userService = userService;
     }
     @Override
-    public void requestToCollectData(String userName) {
+    public void requestToCollectData(UserProfile userProfile) {
         try {
-            String userType = String.valueOf(getUserType(userName));
+            String userName = userProfile.getUserName();
+            String userType = String.valueOf(userProfile.getUserType());
             Document userData = collectUserData(userName, userType);
             String status = userData.getString("status");
             storeMetaData(userName, userType, status);
@@ -36,9 +37,10 @@ public class DataCreation implements IDataCreation {
             dataCollectionQueue.add(dataCollectionEvent);
             processDataCollectionQueue();
         } catch (Exception e) {
-            logger.error("error during data collection for user: " + userName, e);
+            logger.error("error during data collection for user: " + userProfile.getUserName(), e);
         }
     }
+
     private Document createDataCollectionEvent(String userName, String userType, Document userData) {
         return new Document("type", "dataCollection")
                 .append("userName", userName)
