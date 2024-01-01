@@ -11,14 +11,27 @@ import Events.EventHandlerMethods;
 import iam.UserType;
 
 public class EventDrivenUserActivityService extends UserActivityServiceDecorator {
+
+
     public EventDrivenUserActivityService(IUserActivityService userActivityService) {
         super(userActivityService);
+
     }
 
     @Override
-    void update(String userId, UserActivity newData) {
-
-
+    void update(String userId, String activityId,UserActivity newData) {
+        List<UserActivity> userActivities=getUserActivity(userId);
+        if(userActivities.isEmpty()){
+            return;
+        }
+        for (UserActivity userActivity: userActivities) {
+            if(userActivity.getId().equals(activityId)){
+                userActivities.remove(userActivity);
+                break;
+            }
+        }
+        userActivities.add(newData);
+        EventHandlerMethods.handleUserDataEvent("userActivity",userActivities,userId);
     }
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent){

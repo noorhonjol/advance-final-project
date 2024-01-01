@@ -16,11 +16,6 @@ public class EventDrivenPaymentService extends PaymentServiceDecorator{
 
     }
 
-    @Override
-    public void updatePayment(String userName, IPayment newData) {
-
-    }
-
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent){
         if(collectEvent.getUserType()== UserType.REGULAR_USER||collectEvent.getUserType()==UserType.NEW_USER) {

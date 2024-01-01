@@ -31,20 +31,6 @@ public class MongoDBSingleton implements IDataBase{
         return databases.computeIfAbsent(dbName, mongoClient::getDatabase);
     }
 
-    @Override
-    public void insert(String dbName, String collectionName, Document document) {
-        MongoDatabase database = getDatabase(dbName);
-        MongoCollection<Document> collection = database.getCollection(collectionName);
-        collection.insertOne(document);
-    }
-
-//    @Override
-//    public List<Document> findByUsername(String dbName, String collectionName, String username) {
-//
-//        MongoCollection<Document> collection = getCollection(dbName, collectionName);
-//        collection.
-//        return collection.find(Filters.eq("username", username)).into(new ArrayList<>());
-//    }
 
     @Override
     public MongoCollection<Document> getCollection(String dbName, String collectionName) {
@@ -59,7 +45,6 @@ public class MongoDBSingleton implements IDataBase{
 
     @Override
     public void updateUserDataInMongo(MongoCollection<Document> collection, Document existingUserData, Document newDocs) {
-
         collection.updateOne(existingUserData, new Document("$set", newDocs));
     }
 

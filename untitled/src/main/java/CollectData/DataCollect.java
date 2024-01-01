@@ -6,23 +6,15 @@ import Events.UserDataEvent;
 import com.google.common.eventbus.Subscribe;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
-import java.util.List;
 
 public class DataCollect implements IDataCollect{
 
     private static final IDataBase dataBase= MongoDBSingleton.getInstance();
-    @Override
-    public void addData(Object data) {
 
-    }
-
-    @Override
-    public void updateData(Object data) {
-
-    }
 
     @Override
     public void deleteData(String userName) {
+
 
     }
 

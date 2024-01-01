@@ -19,8 +19,26 @@ public class EventDrivenPostService extends PostServiceDecorator {
     }
 
     @Override
-    public void updatePost(String id, Post newData) {
-        //consume to queue
+    public void updatePost(String userId,String postId, Post newData) {
+        List<Post> posts=getPosts(userId);
+
+        if(posts.isEmpty()){
+            return;
+        }
+        for(Post post:posts){
+            if(post.getId().equals(postId)){
+                post.setAuthor(newData.getAuthor());
+                post.setTitle(newData.getTitle());
+                post.setBody(newData.getBody());
+                post.setTitle(newData.getTitle());
+                post.setDate(newData.getDate());
+                break;
+            }
+        }
+
+
+        EventHandlerMethods.handleUserDataEvent("posts",posts,newData.getAuthor());
+
     }
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent){
