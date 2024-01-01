@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IDataCreation {
 
-    void requestToCollectData(UserProfile userProfile);//this produce Event
+    void requestToCollectData(UserProfile userProfile);
 
 
 
