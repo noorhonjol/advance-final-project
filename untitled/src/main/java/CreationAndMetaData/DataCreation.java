@@ -27,6 +27,7 @@ public class DataCreation implements IDataCreation {
     }
     @Override
     public void requestToCollectData(UserProfile userProfile) {
+
         try {
             String userName = userProfile.getUserName();
             String userType = String.valueOf(userProfile.getUserType());
