@@ -7,9 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import org.bson.Document;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MongoDBSingleton implements IDataBase{
@@ -40,10 +38,33 @@ public class MongoDBSingleton implements IDataBase{
         collection.insertOne(document);
     }
 
+//    @Override
+//    public List<Document> findByUsername(String dbName, String collectionName, String username) {
+//
+//        MongoCollection<Document> collection = getCollection(dbName, collectionName);
+//        collection.
+//        return collection.find(Filters.eq("username", username)).into(new ArrayList<>());
+//    }
+
     @Override
-    public List<Document> findByUsername(String dbName, String collectionName, String username) {
+    public MongoCollection<Document> getCollection(String dbName, String collectionName) {
         MongoDatabase database = getDatabase(dbName);
-        MongoCollection<Document> collection = database.getCollection(collectionName);
-        return collection.find(Filters.eq("username", username)).into(new ArrayList<>());
+        return database.getCollection(collectionName);
+    }
+
+    @Override
+    public Document checkUserProfileInMongo(MongoCollection<Document> collection, String userName) {
+        return collection.find(Filters.eq("userName", userName)).first();
+    }
+
+    @Override
+    public void updateUserDataInMongo(MongoCollection<Document> collection, Document existingUserData, Document newDocs) {
+
+        collection.updateOne(existingUserData, new Document("$set", newDocs));
+    }
+
+    @Override
+    public void insertNewUserDataInMongo(MongoCollection<Document> collection, Document newUserData) {
+        collection.insertOne(newUserData);
     }
 }
