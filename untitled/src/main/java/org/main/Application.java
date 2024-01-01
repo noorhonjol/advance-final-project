@@ -1,6 +1,7 @@
 package org.main;
 
 
+import CreationAndMetaData.DataCreation;
 import Database.IDataBase;
 import Database.MongoDBSingleton;
 import activity.IUserActivityService;
@@ -27,6 +28,7 @@ import posts.PostService;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 public class Application {
@@ -42,10 +44,7 @@ public class Application {
 //        generateRandomData();
 
         logger.info("Application Started: ");
-        //TODO Your application starts here. Do not Change the existing code
-        IDataBase database=MongoDBSingleton.getInstance();
-
-        //TODO Your application ends here. Do not Change the existing code
+        IDataBase database = MongoDBSingleton.getInstance();
         logger.info("Application Ended: ");
     }
 

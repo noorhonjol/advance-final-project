@@ -3,6 +3,7 @@ import Database.MongoDBSingleton;
 import MessageQueue.MockQueue;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
 import iam.IUserService;
 import iam.UserProfile;
 import iam.UserType;
@@ -44,12 +45,19 @@ public class DataCreation implements IDataCreation {
                 .append("userType", userType)
                 .append("userData", userData);
     }
+
+
     @Override
-    public List<Document> getMetaData() {
+    public Document getMetaData(String userName) {
         MongoDatabase database = dbSingleton.getDatabase("MyBase");
         MongoCollection<Document> collection = database.getCollection("MyColection");
-        return collection.find().into(new ArrayList<>());
+        try {
+            return collection.find(Filters.eq("userName", userName)).first();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
     private UserType getUserType(String userName) {
         UserProfile userProfile = userService.getUser(userName);
         if (userProfile != null) {
@@ -76,7 +84,8 @@ public class DataCreation implements IDataCreation {
             }
         }
     }
-    private void storeMetaData(String userName, String userType, String status) {
+
+    public void storeMetaData(String userName, String userType, String status) {
         try {
             Document metaData = new Document("userName", userName)
                     .append("userType", userType)

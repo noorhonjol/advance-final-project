@@ -8,8 +8,6 @@ public interface IDataCreation {
 
     void requestToCollectData(String userName);//this produce Event
 
-    List<Document> getMetaData();
 
-
-
+    Document getMetaData(String userName);
 }
