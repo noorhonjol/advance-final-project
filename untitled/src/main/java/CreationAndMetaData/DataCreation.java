@@ -63,7 +63,6 @@ public class DataCreation implements IDataCreation {
         try {
             Document query = new Document("userName", userName).append("status", "Pending");
             Document update = new Document("$set", new Document("status", "Complete"));
-
             UpdateResult result = collection.updateOne(query, update);
             if (result.getModifiedCount() == 1) {
                 logger.info("status updated to complete for user: " + userName);
