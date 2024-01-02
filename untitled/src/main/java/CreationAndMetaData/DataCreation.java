@@ -1,14 +1,18 @@
 package CreationAndMetaData;
+
 import Database.MongoDBSingleton;
 import Events.CreationCollectEvent;
 import MessageQueue.MockQueue;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.UpdateResult;
 import iam.UserProfile;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 
 public class DataCreation implements IDataCreation {
     private final Logger logger = LoggerFactory.getLogger(DataCreation.class);
@@ -16,64 +20,60 @@ public class DataCreation implements IDataCreation {
     private final MongoDBSingleton dbSingleton = MongoDBSingleton.getInstance();
 
     @Override
-    public void requestToCollectData(UserProfile userProfile) {
-        try {
-            String userName = userProfile.getUserName();
-
-            String userType = String.valueOf(userProfile.getUserType());
-
-            storeMetaData(userName, userType, "Pending");
-
-            messageQueue.produce(new CreationCollectEvent(userName,userProfile.getUserType()));
-
-        } catch (Exception e) {
-
-            logger.error("error during data collection for user: " + userProfile.getUserName(), e);
-
+    public void requestToCollectData(UserProfile userProfile) throws BadRequestException, SystemBusyException {
+        if (userProfile == null || userProfile.getUserName() == null || userProfile.getUserType() == null) {
+            throw new BadRequestException("Invalid user profile data");
         }
+        storeMetaData(userProfile.getUserName(), String.valueOf(userProfile.getUserType()), "Pending");
+        messageQueue.produce(new CreationCollectEvent(userProfile.getUserName(), userProfile.getUserType()));
+        logger.info("Data collection request initiated for user: " + userProfile.getUserName());
     }
+
     @Override
-    public Document getMetaData(String userName) {
-
-        MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyColection");
-
+    public Document getMetaData(String userName) throws NotFoundException, SystemBusyException {
         try {
-            return collection.find(Filters.eq("userName", userName)).first();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public boolean completePendingStatus(String userName) {
-        try {
-
-            MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyColection");
-
-            Document document=dbSingleton.checkUserProfileInMongo(collection,userName);
-            Document editedDocument=new Document(document);
-            if(document==null){
-                return false;
+            MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyCollection");
+            Document doc = collection.find(Filters.eq("userName", userName)).first();
+            if (doc == null) {
+                throw new NotFoundException("Metadata not found for user: " + userName);
             }
-            editedDocument.put("status","Complete");
-            dbSingleton.updateUserDataInMongo(collection,document,editedDocument);
-
-            return true;
-        } catch (Exception e) {
-            logger.error("error updating status to complete for user: " + userName, e);
+            logger.info("Retrieved metadata for user: " + userName);
+            return doc;
+        } catch (MongoException e) {
+            logger.error("MongoDB error while retrieving metadata", e);
+            throw new SystemBusyException("Database operation failed");
         }
-        return false;
     }
-    private void storeMetaData(String userName, String userType, String status) {
+
+    public boolean completePendingStatus(String userName) throws NotFoundException, SystemBusyException {
+        try {
+            MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyCollection");
+            Document document = dbSingleton.checkUserProfileInMongo(collection, userName);
+            if(document == null) {
+                throw new NotFoundException("User not found: " + userName);
+            }
+            Document editedDocument = new Document(document);
+            editedDocument.put("status", "Complete");
+            dbSingleton.updateUserDataInMongo(collection, document, editedDocument);
+            logger.info("Updated user status to 'Complete' for user: " + userName);
+            return true;
+        } catch (MongoException e) {
+            logger.error("MongoDB error while updating user status", e);
+            throw new SystemBusyException("Database operation failed");
+        }
+    }
+
+    private void storeMetaData(String userName, String userType, String status) throws SystemBusyException {
         try {
             Document metaData = new Document("userName", userName)
                     .append("userType", userType)
                     .append("status", status);
-
-            MongoCollection<Document> collection =dbSingleton.getCollection("MyBase", "MyColection");
-
+            MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyCollection");
             dbSingleton.insertNewUserDataInMongo(collection, metaData);
-
-        } catch (Exception e) {
-            logger.error("Error storing metadata for user: " + userName, e);
+            logger.info("Stored metadata for user: " + userName);
+        } catch (MongoException e) {
+            logger.error("MongoDB error while storing metadata", e);
+            throw new SystemBusyException("Database operation failed");
         }
     }
 }
