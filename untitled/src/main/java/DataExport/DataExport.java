@@ -17,6 +17,9 @@ import org.apache.logging.log4j.Logger;
 public class DataExport implements IDataExport {
     private static final Logger logger = LogManager.getLogger(DataExport.class);
     protected IDataCollect dataCollector;
+
+    private static final IDataCreation dataCreation = new DataCreation();
+
     public DataExport(IDataCollect dataCollector) {
         this.dataCollector = dataCollector;
     }
@@ -38,9 +41,12 @@ public class DataExport implements IDataExport {
         try {
             Document userData = dataCollector.getCollectedData(userName);
             for (String serviceType : userData.keySet()) {
+                if(serviceType.equals("_id")||serviceType.equals("userName")){
+                    continue;
+                }
                 Object serviceData = userData.get(serviceType);
                 logger.info("Converting data to PDF for service type: " + serviceType);
-                PdfConvertTemplete converter = PdfFactoryConvertor.getFactoryByTypeOfService(serviceType).createConverter();
+                PdfConvertTemplete converter = PdfFactoryConvertor.getFactoryByTypeOfService(serviceType.trim()).createConverter();
                 File pdfFile = converter.convertToPdf(userName + "-" + serviceType + ".pdf", serviceData);
                 pdfFiles.add(pdfFile);
                 logger.info("Data for service type: " + serviceType + " converted successfully and added to list");
@@ -79,5 +85,11 @@ public class DataExport implements IDataExport {
             logger.error("Illegal Argument Exception Exception happened {} Service type Not supported", e.getMessage());
         }
         return null;
+    }
+    private Document getMetaData(String userName) {
+        logger.info("Getting metadata for user: " + userName);
+        Document metaData = dataCreation.getMetaData(userName);
+        logger.info("Metadata retrieved for user: " + userName);
+        return metaData;
     }
 }

@@ -35,13 +35,13 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
             }
         }
         userActivities.add(newData);
-        EventHandlerMethods.handleUserDataEvent("userActivity",userActivities,userId);
+        EventHandlerMethods.handleUserDataEvent("userActivities",userActivities,userId);
     }
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, BadRequestException, NotFoundException {
 
         if(collectEvent.getUserType()== UserType.NEW_USER) {
-            EventHandlerMethods.handleUserDataEvent("userActivity",new Object(),collectEvent.getUserName());
+            EventHandlerMethods.handleUserDataEvent("userActivities",new Object(),collectEvent.getUserName());
             return;
         }
         List<UserActivity> userActivities=getUserActivity(collectEvent.getUserName());
@@ -50,7 +50,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
 
             return;
         }
-        EventHandlerMethods.handleUserDataEvent("userActivity",userActivities,collectEvent.getUserName());
+        EventHandlerMethods.handleUserDataEvent("userActivities",userActivities,collectEvent.getUserName());
     }
     @Subscribe
     void handleDeleteEvent(DeleteEvent deleteEvent) throws SystemBusyException, BadRequestException, NotFoundException {
@@ -63,7 +63,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
 
         userActivities.clear();
 
-        EventHandlerMethods.handleUserDataEvent("userActivity",new Object(),deleteEvent.getUserName());
+        EventHandlerMethods.handleUserDataEvent("userActivities",new Object(),deleteEvent.getUserName());
     }
 
 

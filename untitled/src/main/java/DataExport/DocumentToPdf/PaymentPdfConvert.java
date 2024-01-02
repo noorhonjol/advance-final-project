@@ -21,9 +21,10 @@ public class PaymentPdfConvert extends PdfConvertTemplete {
             }
         } else if (data instanceof Document) {
             addPaymentToPdf(pdfDocument, (org.bson.Document) data);
-        } else {
-            throw new IllegalArgumentException("Invalid data type for payments");
         }
+//        else {
+//            throw new IllegalArgumentException("Invalid data type for payments");
+//        }
     }
 
     private void addPaymentToPdf(Document pdfDocument, org.bson.Document payment) {
