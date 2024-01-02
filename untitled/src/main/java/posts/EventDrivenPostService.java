@@ -2,7 +2,6 @@ package posts;
 
 
 import Events.CreationCollectEvent;
-import Events.DeleteEvent;
 import Events.EventHandlerMethods;
 import MessageQueue.IMessageQueue;
 import MessageQueue.MockQueue;
@@ -52,17 +51,17 @@ public class EventDrivenPostService extends PostServiceDecorator {
 
         EventHandlerMethods.handleUserDataEvent("posts",posts,collectEvent.getUserName());
     }
-    @Subscribe
-    void handleDeleteEvent(DeleteEvent deleteEvent){
-
-        List<Post> posts=getPosts(deleteEvent.getUserName());
-
-        if(posts.isEmpty()){
-            return;
-        }
-
-        posts.clear();
-
-        EventHandlerMethods.handleUserDataEvent("posts","",deleteEvent.getUserName());
-    }
+//    @Subscribe
+//    void handleDeleteEvent(DeleteEvent deleteEvent){
+//
+//        List<Post> posts=getPosts(deleteEvent.getUserName());
+//
+//        if(posts.isEmpty()){
+//            return;
+//        }
+//
+//        posts.clear();
+//
+//        EventHandlerMethods.handleUserDataEvent("posts","",deleteEvent.getUserName());
+//    }
 }

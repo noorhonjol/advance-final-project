@@ -1,5 +1,10 @@
 package activity;
 
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
+import exceptions.Util;
+
 import java.util.*;
 
 public class UserActivityService implements IUserActivityService {
@@ -10,12 +15,20 @@ public class UserActivityService implements IUserActivityService {
     }
 
     @Override
-    public List<UserActivity> getUserActivity(String userId) {
+    public List<UserActivity> getUserActivity(String userId) throws SystemBusyException, BadRequestException, NotFoundException {
+        Util.validateUserName(userId);
+        if (!userActivityMap.containsKey(userId)) {
+            throw new NotFoundException("User does not exist");
+        }
         return userActivityMap.get(userId);
     }
 
     @Override
-    public void removeUserActivity(String userId, String id) {
+    public void removeUserActivity(String userId, String id) throws SystemBusyException, BadRequestException, NotFoundException {
+        Util.validateUserName(userId);
+        if (!userActivityMap.containsKey(userId)) {
+            throw new NotFoundException("User does not exist");
+        }
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {

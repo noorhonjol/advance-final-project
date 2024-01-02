@@ -1,5 +1,6 @@
 package iam;
 import Events.EventHandlerMethods;
+import exceptions.NotFoundException;
 
 
 public class UserProfileServiceDecorator implements IUserService {
@@ -14,7 +15,7 @@ public class UserProfileServiceDecorator implements IUserService {
     }
 
     @Override
-    public void updateUser(UserProfile user) {
+    public void updateUser(UserProfile user) throws NotFoundException, SystemBusyException, BadRequestException {
         userService.updateUser(user);
         EventHandlerMethods.handleUserDataEvent("user-profile",user,user.getUserName());
     }

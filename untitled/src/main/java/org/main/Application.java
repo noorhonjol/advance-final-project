@@ -2,7 +2,7 @@ package org.main;
 
 
 import CollectData.DataCollect;
-import CreationAndMetaData.Creation;
+import CreationAndMetaData.DataCreation;
 import MessageQueue.IMessageQueue;
 import MessageQueue.MockQueue;
 import activity.EventDrivenUserActivityService;
@@ -44,7 +44,7 @@ public class Application {
         var userServiceWithEvent=new EventDrivenUserProfileService(userService);
         var activityServiceWithEvent=new EventDrivenUserActivityService(userActivityService);
 
-        var creation =new Creation(userServiceWithEvent);
+        var creation =new DataCreation();
 
         var dataCollector=new DataCollect();
 
@@ -55,7 +55,7 @@ public class Application {
         messageQueue.consume(activityServiceWithEvent);
         messageQueue.consume(dataCollector);
 
-
+        creation.requestToCollectData(userServiceWithEvent.getUser("user1"));
 //        creation.requestToCollectData("user2");
 
 

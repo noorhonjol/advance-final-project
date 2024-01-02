@@ -27,7 +27,7 @@ public class MongoDBSingleton implements IDataBase{
         return instance;
     }
 
-    public MongoDatabase getDatabase(String dbName) {
+    private MongoDatabase getDatabase(String dbName) {
         return databases.computeIfAbsent(dbName, mongoClient::getDatabase);
     }
 
