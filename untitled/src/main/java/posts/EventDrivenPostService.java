@@ -6,6 +6,9 @@ import Events.EventHandlerMethods;
 import MessageQueue.IMessageQueue;
 import MessageQueue.MockQueue;
 import com.google.common.eventbus.Subscribe;
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 import payment.Transaction;
 
 import java.util.List;
@@ -18,7 +21,7 @@ public class EventDrivenPostService extends PostServiceDecorator {
     }
 
     @Override
-    public void updatePost(String userId,String postId, Post newData) {
+    public void updatePost(String userId,String postId, Post newData) throws SystemBusyException, BadRequestException, NotFoundException {
         List<Post> posts=getPosts(userId);
 
         if(posts.isEmpty()){
@@ -40,7 +43,7 @@ public class EventDrivenPostService extends PostServiceDecorator {
 
     }
     @Subscribe
-    void CollectDataEvent(CreationCollectEvent collectEvent){
+    void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, BadRequestException, NotFoundException {
 
         List<Post> posts=getPosts(collectEvent.getUserName());
 

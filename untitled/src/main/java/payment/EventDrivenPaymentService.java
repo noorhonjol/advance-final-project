@@ -18,6 +18,8 @@ public class EventDrivenPaymentService extends PaymentServiceDecorator{
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent){
         if(collectEvent.getUserType()== UserType.REGULAR_USER||collectEvent.getUserType()==UserType.NEW_USER) {
+            EventHandlerMethods.handleUserDataEvent("payment-info","",collectEvent.getUserName());
+
             return;
         }
 

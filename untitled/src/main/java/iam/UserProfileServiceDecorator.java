@@ -1,6 +1,8 @@
 package iam;
 import Events.EventHandlerMethods;
+import exceptions.BadRequestException;
 import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 
 
 public class UserProfileServiceDecorator implements IUserService {
@@ -21,13 +23,13 @@ public class UserProfileServiceDecorator implements IUserService {
     }
 
     @Override
-    public void deleteUser(String userName) {
+    public void deleteUser(String userName) throws SystemBusyException, NotFoundException, BadRequestException {
         userService.deleteUser(userName);
         EventHandlerMethods.handleUserDataEvent("user-profile","",userName);
     }
 
     @Override
-    public UserProfile getUser(String userName) {
+    public UserProfile getUser(String userName) throws SystemBusyException, NotFoundException, BadRequestException {
         return userService.getUser(userName);
     }
 

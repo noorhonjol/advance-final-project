@@ -38,7 +38,9 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
     }
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, BadRequestException, NotFoundException {
+
         if(collectEvent.getUserType()== UserType.NEW_USER) {
+            EventHandlerMethods.handleUserDataEvent("userActivity","",collectEvent.getUserName());
             return;
         }
         List<UserActivity> userActivities=getUserActivity(collectEvent.getUserName());
@@ -47,7 +49,6 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
 
             return;
         }
-
         EventHandlerMethods.handleUserDataEvent("userActivity",userActivities,collectEvent.getUserName());
     }
 //    @Subscribe

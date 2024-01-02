@@ -7,7 +7,7 @@ import exceptions.SystemBusyException;
 import java.util.List;
 
 public interface IPostService {
-    void addPost(Post post);
+    void addPost(Post post) throws SystemBusyException, BadRequestException, NotFoundException;
 
     List<Post> getPosts(String author) throws SystemBusyException, BadRequestException, NotFoundException;
 

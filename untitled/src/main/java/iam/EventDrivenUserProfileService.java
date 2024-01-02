@@ -5,13 +5,16 @@ import Events.CreationCollectEvent;
 import Events.EventHandlerMethods;
 import com.google.common.eventbus.Subscribe;
 import dataDeletion.DeleteType;
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 
 public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
     public EventDrivenUserProfileService(IUserService userService) {
         super(userService);
     }
     @Subscribe
-    void CollectDataEvent(CreationCollectEvent collectEvent){
+    void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, NotFoundException, BadRequestException {
 
         UserProfile userProfile=getUser(collectEvent.getUserName());
 
