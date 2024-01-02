@@ -40,7 +40,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
     void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, BadRequestException, NotFoundException {
 
         if(collectEvent.getUserType()== UserType.NEW_USER) {
-            EventHandlerMethods.handleUserDataEvent("userActivity","",collectEvent.getUserName());
+            EventHandlerMethods.handleUserDataEvent("userActivity",new Object(),collectEvent.getUserName());
             return;
         }
         List<UserActivity> userActivities=getUserActivity(collectEvent.getUserName());

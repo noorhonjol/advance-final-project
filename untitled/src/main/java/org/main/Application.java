@@ -68,7 +68,7 @@ public class Application {
         messageQueue.consume(dataCollector);
 
         creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
-        creation.completePendingStatus(getLoginUserName());
+//        creation.completePendingStatus(getLoginUserName());
 //        creation.requestToCollectData("user2");
 
 

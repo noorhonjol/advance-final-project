@@ -21,7 +21,7 @@ public class EventDrivenPaymentService extends PaymentServiceDecorator{
     @Subscribe
     void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, BadRequestException, NotFoundException {
         if(collectEvent.getUserType()== UserType.REGULAR_USER||collectEvent.getUserType()==UserType.NEW_USER) {
-            EventHandlerMethods.handleUserDataEvent("payment-info","",collectEvent.getUserName());
+            EventHandlerMethods.handleUserDataEvent("payment-info",new Object(),collectEvent.getUserName());
 
             return;
         }
