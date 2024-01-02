@@ -52,4 +52,8 @@ public class MongoDBSingleton implements IDataBase{
     public void insertNewUserDataInMongo(MongoCollection<Document> collection, Document newUserData) {
         collection.insertOne(newUserData);
     }
+    @Override
+    public void deleteUserDataInMongo(MongoCollection<Document> collection, String userName) {
+        collection.deleteOne(Filters.eq("userName", userName));
+    }
 }

@@ -14,4 +14,7 @@ public interface IDataBase {
     void updateUserDataInMongo(MongoCollection<Document> collection, Document existingUserData, Document newDocs);
 
     void insertNewUserDataInMongo(MongoCollection<Document> collection, Document newUserData);
+
+    void deleteUserDataInMongo(MongoCollection<Document> collection, String userName);
+    
 }

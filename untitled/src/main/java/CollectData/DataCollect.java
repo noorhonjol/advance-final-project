@@ -43,6 +43,15 @@ public class DataCollect implements IDataCollect{
         dataBase.updateUserDataInMongo(collection,document,event.getServiceData());
 
     }
+    @Override
+    public void deleteData(String userName) {
+
+        MongoCollection<Document>collection=dataBase.getCollection("advance-course","test");
+
+        dataBase.checkUserProfileInMongo(collection,userName);
+
+        dataBase.deleteUserDataInMongo(collection,userName);
+    }
 
 
 
