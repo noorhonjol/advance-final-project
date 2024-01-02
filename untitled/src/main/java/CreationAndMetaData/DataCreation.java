@@ -44,23 +44,23 @@ public class DataCreation implements IDataCreation {
         }
     }
     public boolean completePendingStatus(String userName) {
-        MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyColection");
-
         try {
-            Document query = new Document("userName", userName).append("status", "Pending");
-            Document update = new Document("$set", new Document("status", "Complete"));
-            UpdateResult result = collection.updateOne(query, update);
-            if (result.getModifiedCount() == 1) {
-                logger.info("status updated to complete for user: " + userName);
-                return true;
-            } else {
-                logger.info("no update made for user: " + userName);
+
+            MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyColection");
+
+            Document document=dbSingleton.checkUserProfileInMongo(collection,userName);
+            Document editedDocument=new Document(document);
+            if(document==null){
                 return false;
             }
+            editedDocument.put("status","Complete");
+            dbSingleton.updateUserDataInMongo(collection,document,editedDocument);
+
+            return true;
         } catch (Exception e) {
             logger.error("error updating status to complete for user: " + userName, e);
-            return false;
         }
+        return false;
     }
     private void storeMetaData(String userName, String userType, String status) {
         try {

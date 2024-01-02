@@ -3,6 +3,9 @@ package payment;
 import Events.CreationCollectEvent;
 import Events.EventHandlerMethods;
 import com.google.common.eventbus.Subscribe;
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 import iam.UserType;
 
 
@@ -16,7 +19,7 @@ public class EventDrivenPaymentService extends PaymentServiceDecorator{
     }
 
     @Subscribe
-    void CollectDataEvent(CreationCollectEvent collectEvent){
+    void CollectDataEvent(CreationCollectEvent collectEvent) throws SystemBusyException, BadRequestException, NotFoundException {
         if(collectEvent.getUserType()== UserType.REGULAR_USER||collectEvent.getUserType()==UserType.NEW_USER) {
             EventHandlerMethods.handleUserDataEvent("payment-info","",collectEvent.getUserName());
 

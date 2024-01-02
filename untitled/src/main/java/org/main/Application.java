@@ -9,6 +9,9 @@ import activity.EventDrivenUserActivityService;
 import activity.IUserActivityService;
 import activity.UserActivity;
 import activity.UserActivityService;
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 import iam.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,7 @@ import payment.Transaction;
 import posts.*;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
 public class Application {
@@ -28,15 +32,23 @@ public class Application {
     private static final IUserService userService = new UserService();
     private static final IPostService postService = new PostService();
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static String loginUserName;
 
 
 
-    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
+    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, SystemBusyException, NotFoundException, BadRequestException {
         generateRandomData();
 
         logger.info("Application Started: ");
-
+        Instant start = Instant.now();
+        System.out.println("Application Started: " + start);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter your username: ");
+        System.out.println("Note: You can use any of the following usernames: user0, user1, user2, user3, .... user99");
+        String userName = scanner.nextLine();
+        setLoginUserName(userName);
         //TODO Your application starts here. Do not Change the existing code
+
 
 
         var paymentServiceWithEvent=new EventDrivenPaymentService(paymentService);
@@ -55,7 +67,8 @@ public class Application {
         messageQueue.consume(activityServiceWithEvent);
         messageQueue.consume(dataCollector);
 
-        creation.requestToCollectData(userServiceWithEvent.getUser("user1"));
+        creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
+        creation.completePendingStatus(getLoginUserName());
 //        creation.requestToCollectData("user2");
 
 
@@ -76,7 +89,11 @@ public class Application {
 
     private static void generateActivity(int i) {
         for (int j = 0; j < 100; j++) {
-            userActivityService.addUserActivity(new UserActivity("user" + i, "activity" + i + "." + j, Instant.now().toString()));
+            try {
+                userActivityService.addUserActivity(new UserActivity("user" + i, "activity" + i + "." + j, Instant.now().toString()));
+            } catch (Exception e) {
+                System.err.println("Error while generating activity for user" + i);
+            }
         }
     }
 
@@ -88,7 +105,11 @@ public class Application {
 
     private static void generatePost(int i) {
         for (int j = 0; j < 100; j++) {
-            postService.addPost(new Post("title" + i + "." + j, "body" + i + "." + j, "user" + i, Instant.now().toString()));
+            try {
+                postService.addPost(new Post("title" + i + "." + j, "body" + i + "." + j, "user" + i, Instant.now().toString()));
+            } catch (Exception e) {
+                System.err.println("Error while generating post for user" + i);
+            }
         }
     }
 
@@ -120,5 +141,12 @@ public class Application {
         } else {
             return UserType.PREMIUM_USER;
         }
+    }
+    public static String getLoginUserName() {
+        return loginUserName;
+    }
+
+    private static void setLoginUserName(String loginUserName) {
+        Application.loginUserName = loginUserName;
     }
 }
