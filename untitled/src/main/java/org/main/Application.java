@@ -1,17 +1,15 @@
 package org.main;
+
+
 import CollectData.DataCollect;
 import CreationAndMetaData.Creation;
-import Events.DeleteEvent;
 import MessageQueue.IMessageQueue;
 import MessageQueue.MockQueue;
 import activity.EventDrivenUserActivityService;
 import activity.IUserActivityService;
 import activity.UserActivity;
 import activity.UserActivityService;
-import dataDeletion.DataDeletion;
-import dataDeletion.DeleteType;
 import iam.*;
-import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import payment.EventDrivenPaymentService;
@@ -21,8 +19,6 @@ import payment.Transaction;
 import posts.*;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 
 public class Application {
@@ -41,7 +37,8 @@ public class Application {
         logger.info("Application Started: ");
 
         //TODO Your application starts here. Do not Change the existing code
-        var dataDeletion=new DataDeletion();
+
+
         var paymentServiceWithEvent=new EventDrivenPaymentService(paymentService);
         var postServiceWithEvent=new EventDrivenPostService(postService);
         var userServiceWithEvent=new EventDrivenUserProfileService(userService);
@@ -58,13 +55,13 @@ public class Application {
         messageQueue.consume(activityServiceWithEvent);
         messageQueue.consume(dataCollector);
 
-        dataDeletion.deleteData("user2", DeleteType.hard);
 
 //        creation.requestToCollectData("user2");
 
 
 
         //TODO Your application ends here. Do not Change the existing code
+
         logger.info("Application Ended: ");
     }
     private static void generateRandomData() {
