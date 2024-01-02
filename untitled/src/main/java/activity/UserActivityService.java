@@ -32,7 +32,7 @@ public class UserActivityService implements IUserActivityService {
                 throw new NotFoundException("User does not exist with ID: " + userId);
             }
             return new ArrayList<>(userActivityMap.get(userId));
-        } catch (BadRequestException e) {
+        } catch (BadRequestException | NotFoundException e) {
             logger.warning("Error during getting user activity: " + e.getMessage());
             throw e;
         }
@@ -44,20 +44,24 @@ public class UserActivityService implements IUserActivityService {
             if (!userActivityMap.containsKey(userId)) {
                 throw new NotFoundException("User does not exist with ID: " + userId);
             }
-            try {
-                Thread.sleep(100);
-                Iterator<UserActivity> iterator = userActivityMap.get(userId).iterator();
-                while (iterator.hasNext()) {
-                    UserActivity activity = iterator.next();
-                    if (activity.getId().equals(id)) {
-                        iterator.remove();
-                    }
+            Iterator<UserActivity> iterator = userActivityMap.get(userId).iterator();
+            boolean found = false;
+            while (iterator.hasNext()) {
+                UserActivity activity = iterator.next();
+                if (activity.getId().equals(id)) {
+                    iterator.remove();
+                    found = true;
+                    break;
                 }
-            } catch (InterruptedException e) {
-                throw new SystemBusyException("Thread interrupted during processing");
             }
-        } catch (BadRequestException e) {
+            if (!found) {
+                throw new NotFoundException("Activity not found with ID: " + id);
+            }
+        } catch (BadRequestException | NotFoundException e) {
             logger.warning("Error during removing user activity: " + e.getMessage());
+            throw e;
+        } catch (SystemBusyException e) {
+            logger.severe("System is currently busy: " + e.getMessage());
             throw e;
         }
     }

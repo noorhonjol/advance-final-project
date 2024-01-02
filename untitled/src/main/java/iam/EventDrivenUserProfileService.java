@@ -24,13 +24,16 @@ public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
             UserProfile userProfile = getUser(collectEvent.getUserName());
 
             if (userProfile == null) {
-                return;
+                throw new NotFoundException("User profile not found for: " + collectEvent.getUserName());
             }
 
             EventHandlerMethods.handleUserDataEvent("user-profile", userProfile, collectEvent.getUserName());
-        } catch (Exception e) {
+        } catch (BadRequestException | NotFoundException | SystemBusyException e) {
             logger.error("Error during CollectDataEvent: " + e.getMessage(), e);
             throw e;
+        } catch (Exception e) {
+            logger.error("Unhandled error during CollectDataEvent: " + e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -43,9 +46,12 @@ public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
 
             deleteUser(deleteEvent.getUserName());
             EventHandlerMethods.handleUserDataEvent("user-profile", new Object(), deleteEvent.getUserName());
-        } catch (Exception e) {
+        } catch (BadRequestException | NotFoundException | SystemBusyException e) {
             logger.error("Error during handleDeleteEvent: " + e.getMessage(), e);
             throw e;
+        } catch (Exception e) {
+            logger.error("Unhandled error during handleDeleteEvent: " + e.getMessage(), e);
+            throw new RuntimeException(e);
         }
     }
 }
