@@ -1,12 +1,16 @@
 package activity;
 
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
+
 import java.util.List;
 
 public interface IUserActivityService {
 
-    void addUserActivity(UserActivity userActivity);
+    void addUserActivity(UserActivity userActivity) throws SystemBusyException, BadRequestException, NotFoundException;
 
-    List<UserActivity> getUserActivity(String userId);
+    List<UserActivity> getUserActivity(String userId) throws SystemBusyException, BadRequestException, NotFoundException;
 
-    void removeUserActivity(String userId, String id);
+    void removeUserActivity(String userId, String id) throws SystemBusyException, BadRequestException, NotFoundException;
 }

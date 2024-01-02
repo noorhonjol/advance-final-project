@@ -1,34 +1,25 @@
 package org.main;
-
-
 import CollectData.DataCollect;
 import DataExport.DataExport;
-import Database.IDataBase;
-import Database.MongoDBSingleton;
+import CreationAndMetaData.DataCreation;
+import MessageQueue.IMessageQueue;
+import MessageQueue.MockQueue;
+import activity.EventDrivenUserActivityService;
 import activity.IUserActivityService;
 import activity.UserActivity;
 import activity.UserActivityService;
-import com.mongodb.client.MongoDatabase;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
-import iam.IUserService;
-import iam.UserProfile;
-import iam.UserService;
-import iam.UserType;
-import org.bson.Document;
+import exceptions.BadRequestException;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
+import iam.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import payment.EventDrivenPaymentService;
 import payment.IPayment;
 import payment.PaymentService;
 import payment.Transaction;
-import posts.IPostService;
-import posts.Post;
-import posts.PostService;
-
+import posts.*;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
@@ -40,15 +31,44 @@ public class Application {
     private static final IUserService userService = new UserService();
     private static final IPostService postService = new PostService();
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
+    private static String loginUserName;
 
-    private final static String QUEUE_NAME = "hello";
-    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, GeneralSecurityException {
-//        generateRandomData();
+
+    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, SystemBusyException, NotFoundException, BadRequestException {
+        generateRandomData();
+
 
         logger.info("Application Started: ");
+        Instant start = Instant.now();
+        System.out.println("Application Started: " + start);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter your username: ");
+        System.out.println("Note: You can use any of the following usernames: user0, user1, user2, user3, .... user99");
+        String userName = scanner.nextLine();
+        setLoginUserName(userName);
         //TODO Your application starts here. Do not Change the existing code
 
-        Scanner scanner = new Scanner(System.in);
+
+
+        var paymentServiceWithEvent=new EventDrivenPaymentService(paymentService);
+        var postServiceWithEvent=new EventDrivenPostService(postService);
+        var userServiceWithEvent=new EventDrivenUserProfileService(userService);
+        var activityServiceWithEvent=new EventDrivenUserActivityService(userActivityService);
+
+        var creation =new DataCreation();
+
+        var dataCollector=new DataCollect();
+
+        IMessageQueue messageQueue= MockQueue.getInstance();
+        messageQueue.consume(paymentServiceWithEvent);
+        messageQueue.consume(postServiceWithEvent);
+        messageQueue.consume(userServiceWithEvent);
+        messageQueue.consume(activityServiceWithEvent);
+        messageQueue.consume(dataCollector);
+
+        creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
+//        creation.completePendingStatus(getLoginUserName());
+//        creation.requestToCollectData("user2");
         System.out.println("How do you want to get your Data:");
         System.out.println("1. Export data and download directly");
         System.out.println("2. Upload data to cloud storage and get a link.");
@@ -60,11 +80,11 @@ public class Application {
         DataExport dataExport=new DataExport(dataCollect);
         switch (choice) {
             case 1:
-                String fileName = dataExport.getPathOfProcessedData("username");
+                String fileName = dataExport.getPathOfProcessedData(getLoginUserName());
                 System.out.println("Data exported to file: " + fileName);
                 break;
             case 2:
-                String cloudLink = dataExport.exportAndUploadData("username", "GoogleDrive");
+                String cloudLink = dataExport.exportAndUploadData(getLoginUserName(), "GoogleDrive");
                 System.out.println("Data uploaded to cloud. This is the Link: " + cloudLink);
                 break;
             default:
@@ -72,18 +92,13 @@ public class Application {
         }
         long endTime = System.currentTimeMillis();
         logger.info("Data export for user completed in {} ms", (endTime - startTime));
-        IDataBase database=MongoDBSingleton.getInstance();
-//        Document newUser = new Document("username", "john_doe")
-//                .append("email", "john@example.com")
-//                .append("name", "John Doe");
-//        database.insert("advance-course", "test", newUser);
-        var res=database.findByUsername("admin","zeft","");
+
+
 
         //TODO Your application ends here. Do not Change the existing code
+
         logger.info("Application Ended: ");
     }
-
-
     private static void generateRandomData() {
         for (int i = 0; i < 100; i++) {
             generateUser(i);
@@ -96,7 +111,11 @@ public class Application {
 
     private static void generateActivity(int i) {
         for (int j = 0; j < 100; j++) {
-            userActivityService.addUserActivity(new UserActivity("user" + i, "activity" + i + "." + j, Instant.now().toString()));
+            try {
+                userActivityService.addUserActivity(new UserActivity("user" + i, "activity" + i + "." + j, Instant.now().toString()));
+            } catch (Exception e) {
+                System.err.println("Error while generating activity for user" + i);
+            }
         }
     }
 
@@ -108,7 +127,11 @@ public class Application {
 
     private static void generatePost(int i) {
         for (int j = 0; j < 100; j++) {
-            postService.addPost(new Post("title" + i + "." + j, "body" + i + "." + j, "user" + i, Instant.now().toString()));
+            try {
+                postService.addPost(new Post("title" + i + "." + j, "body" + i + "." + j, "user" + i, Instant.now().toString()));
+            } catch (Exception e) {
+                System.err.println("Error while generating post for user" + i);
+            }
         }
     }
 
@@ -141,4 +164,12 @@ public class Application {
             return UserType.PREMIUM_USER;
         }
     }
+    public static String getLoginUserName() {
+        return loginUserName;
+    }
+
+    private static void setLoginUserName(String loginUserName) {
+        Application.loginUserName = loginUserName;
+    }
+
 }
