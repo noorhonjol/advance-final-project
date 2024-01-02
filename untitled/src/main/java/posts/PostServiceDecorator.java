@@ -1,5 +1,7 @@
 package posts;
 
+import Events.EventHandlerMethods;
+
 import java.util.List;
 
 public abstract class PostServiceDecorator implements IPostService{
@@ -11,7 +13,11 @@ public abstract class PostServiceDecorator implements IPostService{
 
     @Override
     public void addPost(Post post) {
-        postService.addPost(post);
+        List<Post> posts=getPosts(post.getAuthor());
+
+        posts.add(post);
+
+        EventHandlerMethods.handleUserDataEvent("posts",posts,post.getAuthor());
     }
 
     @Override
@@ -21,8 +27,11 @@ public abstract class PostServiceDecorator implements IPostService{
 
     @Override
     public void deletePost(String author, String id) {
+
         postService.deletePost(author,id);
+
+        EventHandlerMethods.handleUserDataEvent("posts",getPosts(author),author);
     }
 
-    abstract public void updatePost(String id,Post newData);
+    abstract public void updatePost(String userId,String postId,Post newData);
 }

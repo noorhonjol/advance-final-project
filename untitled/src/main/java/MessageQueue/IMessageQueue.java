@@ -1,13 +1,13 @@
 package MessageQueue;
 
+import org.bson.Document;
+
 import java.util.List;
+import java.util.Queue;
 
-public interface IMessageQueue<T> {
-
-    void produce(String queueName,Object message);
-
-    List<Object> consume(String queueName);
-
-    //now its Object I will find solution for it in other time
+public interface IMessageQueue {
+    void produce(Object event);
+    void consume(Object subscriber);
+    void removeConsumer(Object subscriber);
 
 }

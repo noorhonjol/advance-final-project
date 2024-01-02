@@ -1,15 +1,16 @@
 package MessageQueue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.common.eventbus.EventBus;
+import org.bson.Document;
+
+import java.util.*;
 
 public class MockQueue implements IMessageQueue {
-    private static MockQueue instance;
-    private final Map<String, List<Object>> queues = new HashMap<>();
+    private static MockQueue instance = null;
+    private final EventBus eventBus;
 
     private MockQueue() {
+        eventBus = new EventBus();
     }
 
     public static synchronized MockQueue getInstance() {
@@ -20,13 +21,19 @@ public class MockQueue implements IMessageQueue {
     }
 
     @Override
-    public void produce(String queueName, Object message) {
-        queues.computeIfAbsent(queueName, k -> new ArrayList<>()).add(message);
-        System.out.println("Produced to " + queueName + ": " + message);
+    public void produce(Object event) {
+        eventBus.post(event);
     }
 
     @Override
-    public List<Object> consume(String queueName) {
-        return queues.getOrDefault(queueName, new ArrayList<>());
+    public void consume(Object subscriber) {
+        eventBus.register(subscriber);
     }
+
+    @Override
+    public void removeConsumer(Object subscriber) {
+        eventBus.unregister(subscriber);
+    }
+
+
 }

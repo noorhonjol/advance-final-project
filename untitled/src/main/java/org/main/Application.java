@@ -1,32 +1,28 @@
 package org.main;
-
-
-import Database.IDataBase;
-import Database.MongoDBSingleton;
+import CollectData.DataCollect;
+import CreationAndMetaData.Creation;
+import Events.DeleteEvent;
+import MessageQueue.IMessageQueue;
+import MessageQueue.MockQueue;
+import activity.EventDrivenUserActivityService;
 import activity.IUserActivityService;
 import activity.UserActivity;
 import activity.UserActivityService;
-import com.mongodb.client.MongoDatabase;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.DeliverCallback;
-import iam.IUserService;
-import iam.UserProfile;
-import iam.UserService;
-import iam.UserType;
+import dataDeletion.DataDeletion;
+import dataDeletion.DeleteType;
+import iam.*;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import payment.EventDrivenPaymentService;
 import payment.IPayment;
 import payment.PaymentService;
 import payment.Transaction;
-import posts.IPostService;
-import posts.Post;
-import posts.PostService;
-
+import posts.*;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 
 public class Application {
@@ -37,24 +33,40 @@ public class Application {
     private static final IPostService postService = new PostService();
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
-    private final static String QUEUE_NAME = "hello";
+
+
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
-//        generateRandomData();
+        generateRandomData();
 
         logger.info("Application Started: ");
-        //TODO Your application starts here. Do not Change the existing code
 
-        IDataBase database=MongoDBSingleton.getInstance();
-//        Document newUser = new Document("username", "john_doe")
-//                .append("email", "john@example.com")
-//                .append("name", "John Doe");
-//        database.insert("advance-course", "test", newUser);
-        var res=database.findByUsername("admin","zeft","");
+        //TODO Your application starts here. Do not Change the existing code
+        var dataDeletion=new DataDeletion();
+        var paymentServiceWithEvent=new EventDrivenPaymentService(paymentService);
+        var postServiceWithEvent=new EventDrivenPostService(postService);
+        var userServiceWithEvent=new EventDrivenUserProfileService(userService);
+        var activityServiceWithEvent=new EventDrivenUserActivityService(userActivityService);
+
+        var creation =new Creation(userServiceWithEvent);
+
+        var dataCollector=new DataCollect();
+
+        IMessageQueue messageQueue= MockQueue.getInstance();
+        messageQueue.consume(paymentServiceWithEvent);
+        messageQueue.consume(postServiceWithEvent);
+        messageQueue.consume(userServiceWithEvent);
+        messageQueue.consume(activityServiceWithEvent);
+        messageQueue.consume(dataCollector);
+
+        dataDeletion.deleteData("user2", DeleteType.hard);
+
+//        creation.requestToCollectData("user2");
+
+
+
         //TODO Your application ends here. Do not Change the existing code
         logger.info("Application Ended: ");
     }
-
-
     private static void generateRandomData() {
         for (int i = 0; i < 100; i++) {
             generateUser(i);
