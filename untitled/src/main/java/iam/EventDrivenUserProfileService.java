@@ -2,6 +2,7 @@ package iam;
 
 import Events.CreationCollectEvent;
 //import Events.DeleteEvent;
+import Events.DeleteEvent;
 import Events.EventHandlerMethods;
 import com.google.common.eventbus.Subscribe;
 import dataDeletion.DeleteType;
@@ -24,14 +25,14 @@ public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
 
         EventHandlerMethods.handleUserDataEvent("user-profile",userProfile,collectEvent.getUserName());
     }
-//    @Subscribe
-//    void handleDeleteEvent(DeleteEvent deleteEvent){
-//
-//        if(deleteEvent.getDeleteType()== DeleteType.soft){
-//            return;
-//        }
-//        deleteUser(deleteEvent.getUserName());
-//        EventHandlerMethods.handleUserDataEvent("user-profile","",deleteEvent.getUserName());
-//    }
+    @Subscribe
+    void handleDeleteEvent(DeleteEvent deleteEvent) throws SystemBusyException, NotFoundException, BadRequestException {
+
+        if(deleteEvent.getDeleteType()== DeleteType.soft){
+            return;
+        }
+        deleteUser(deleteEvent.getUserName());
+        EventHandlerMethods.handleUserDataEvent("user-profile",new Object(),deleteEvent.getUserName());
+    }
 
 }

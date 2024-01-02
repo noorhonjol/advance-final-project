@@ -2,6 +2,7 @@ package activity;
 
 import Events.CreationCollectEvent;
 
+import Events.DeleteEvent;
 import com.google.common.eventbus.Subscribe;
 
 
@@ -51,19 +52,19 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
         }
         EventHandlerMethods.handleUserDataEvent("userActivity",userActivities,collectEvent.getUserName());
     }
-//    @Subscribe
-//    void handleDeleteEvent(DeleteEvent deleteEvent){
-//
-//        List<UserActivity> userActivities=getUserActivity(deleteEvent.getUserName());
-//
-//        if(userActivities.isEmpty()){
-//            return;
-//        }
-//
-//        userActivities.clear();
-//
-//        EventHandlerMethods.handleUserDataEvent("userActivity","",deleteEvent.getUserName());
-//    }
+    @Subscribe
+    void handleDeleteEvent(DeleteEvent deleteEvent) throws SystemBusyException, BadRequestException, NotFoundException {
+
+        List<UserActivity> userActivities=getUserActivity(deleteEvent.getUserName());
+
+        if(userActivities.isEmpty()){
+            return;
+        }
+
+        userActivities.clear();
+
+        EventHandlerMethods.handleUserDataEvent("userActivity",new Object(),deleteEvent.getUserName());
+    }
 
 
 

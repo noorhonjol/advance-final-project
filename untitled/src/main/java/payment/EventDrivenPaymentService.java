@@ -1,6 +1,7 @@
 package payment;
 
 import Events.CreationCollectEvent;
+import Events.DeleteEvent;
 import Events.EventHandlerMethods;
 import com.google.common.eventbus.Subscribe;
 import exceptions.BadRequestException;
@@ -34,20 +35,20 @@ public class EventDrivenPaymentService extends PaymentServiceDecorator{
         }
         EventHandlerMethods.handleUserDataEvent("payment-info",transactions,collectEvent.getUserName());
     }
-//    @Subscribe
-//    void handleDeleteEvent(DeleteEvent deleteEvent){
-//
-//        List<Transaction> transactions=getTransactions(deleteEvent.getUserName());
-//
-//        if(transactions.isEmpty()){
-//            return;
-//        }
-//
-//        transactions.clear();
-//
-//        EventHandlerMethods.handleUserDataEvent("payment-info","",deleteEvent.getUserName());
-//    }
-//
+    @Subscribe
+    void handleDeleteEvent(DeleteEvent deleteEvent) throws SystemBusyException, BadRequestException, NotFoundException {
+
+        List<Transaction> transactions=getTransactions(deleteEvent.getUserName());
+
+        if(transactions.isEmpty()){
+            return;
+        }
+
+        transactions.clear();
+
+        EventHandlerMethods.handleUserDataEvent("payment-info",new Object(),deleteEvent.getUserName());
+    }
+
 
 
 }
