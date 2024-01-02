@@ -1,31 +1,30 @@
 package CollectData;
 
+import CollectData.*;
 import Database.IDataBase;
 import Database.MongoDBSingleton;
 import Events.UserDataEvent;
 import com.google.common.eventbus.Subscribe;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 
 public class DataCollect implements IDataCollect{
 
     private static final IDataBase dataBase= MongoDBSingleton.getInstance();
 
-
-    @Override
-    public void deleteData(String userName) {
-
-
-    }
-
-    @Override
+   @Override
     public Document getCollectedData(String userName) {
 
-        MongoCollection<Document>collection=dataBase.getCollection("advance-course","test");
+        MongoCollection<Document> collection=dataBase.getCollection("advance-course","test");
 
         return dataBase.checkUserProfileInMongo(collection,userName);
     }
-
 
 
     @Subscribe
@@ -56,4 +55,3 @@ public class DataCollect implements IDataCollect{
 
 
 }
-

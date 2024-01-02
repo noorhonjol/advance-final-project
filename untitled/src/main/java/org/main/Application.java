@@ -1,7 +1,6 @@
 package org.main;
-
-
 import CollectData.DataCollect;
+import DataExport.DataExport;
 import CreationAndMetaData.DataCreation;
 import MessageQueue.IMessageQueue;
 import MessageQueue.MockQueue;
@@ -35,9 +34,9 @@ public class Application {
     private static String loginUserName;
 
 
-
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, SystemBusyException, NotFoundException, BadRequestException {
         generateRandomData();
+
 
         logger.info("Application Started: ");
         Instant start = Instant.now();
@@ -70,6 +69,29 @@ public class Application {
         creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
 //        creation.completePendingStatus(getLoginUserName());
 //        creation.requestToCollectData("user2");
+        System.out.println("How do you want to get your Data:");
+        System.out.println("1. Export data and download directly");
+        System.out.println("2. Upload data to cloud storage and get a link.");
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        long startTime = System.currentTimeMillis();
+
+        DataCollect dataCollect = new DataCollect();
+        DataExport dataExport=new DataExport(dataCollect);
+        switch (choice) {
+            case 1:
+                String fileName = dataExport.getPathOfProcessedData(getLoginUserName());
+                System.out.println("Data exported to file: " + fileName);
+                break;
+            case 2:
+                String cloudLink = dataExport.exportAndUploadData(getLoginUserName(), "GoogleDrive");
+                System.out.println("Data uploaded to cloud. This is the Link: " + cloudLink);
+                break;
+            default:
+                System.out.println("Invalid choice.");
+        }
+        long endTime = System.currentTimeMillis();
+        logger.info("Data export for user completed in {} ms", (endTime - startTime));
 
 
 
@@ -149,4 +171,5 @@ public class Application {
     private static void setLoginUserName(String loginUserName) {
         Application.loginUserName = loginUserName;
     }
+
 }
