@@ -6,7 +6,6 @@ import com.itextpdf.layout.element.Paragraph;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileNotFoundException;
 import java.util.List;
 
 public class ActivityPdfConvertor extends PdfConvertTemplete {
@@ -19,7 +18,7 @@ public class ActivityPdfConvertor extends PdfConvertTemplete {
             for (org.bson.Document activity : activityList) {
                 addActivityToPdf(pdfDocument, activity);
             }
-        } else if (data instanceof Document) {
+        } else if (data instanceof org.bson.Document) {
             addActivityToPdf(pdfDocument, (org.bson.Document) data);
         } else {
             throw new IllegalArgumentException("Invalid data type for activities");

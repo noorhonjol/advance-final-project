@@ -1,6 +1,8 @@
 package org.main;
 
 
+import CollectData.DataCollect;
+import DataExport.DataExport;
 import Database.IDataBase;
 import Database.MongoDBSingleton;
 import activity.IUserActivityService;
@@ -26,7 +28,9 @@ import posts.Post;
 import posts.PostService;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
 public class Application {
@@ -38,18 +42,43 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     private final static String QUEUE_NAME = "hello";
-    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException {
+    public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, GeneralSecurityException {
 //        generateRandomData();
 
         logger.info("Application Started: ");
         //TODO Your application starts here. Do not Change the existing code
 
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("How do you want to get your Data:");
+        System.out.println("1. Export data and download directly");
+        System.out.println("2. Upload data to cloud storage and get a link.");
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        long startTime = System.currentTimeMillis();
+
+        DataCollect dataCollect = new DataCollect();
+        DataExport dataExport=new DataExport(dataCollect);
+        switch (choice) {
+            case 1:
+                String fileName = dataExport.getPathOfProcessedData("username");
+                System.out.println("Data exported to file: " + fileName);
+                break;
+            case 2:
+                String cloudLink = dataExport.exportAndUploadData("username", "GoogleDrive");
+                System.out.println("Data uploaded to cloud. This is the Link: " + cloudLink);
+                break;
+            default:
+                System.out.println("Invalid choice.");
+        }
+        long endTime = System.currentTimeMillis();
+        logger.info("Data export for user completed in {} ms", (endTime - startTime));
         IDataBase database=MongoDBSingleton.getInstance();
 //        Document newUser = new Document("username", "john_doe")
 //                .append("email", "john@example.com")
 //                .append("name", "John Doe");
 //        database.insert("advance-course", "test", newUser);
         var res=database.findByUsername("admin","zeft","");
+
         //TODO Your application ends here. Do not Change the existing code
         logger.info("Application Ended: ");
     }
