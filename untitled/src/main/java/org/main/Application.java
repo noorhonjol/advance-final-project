@@ -65,10 +65,11 @@ public class Application {
         messageQueue.consume(userServiceWithEvent);
         messageQueue.consume(activityServiceWithEvent);
         messageQueue.consume(dataCollector);
+        messageQueue.consume(creation);
 
         creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
-//        creation.completePendingStatus(getLoginUserName());
-//        creation.requestToCollectData("user2");
+
+
         System.out.println("How do you want to get your Data:");
         System.out.println("1. Export data and download directly");
         System.out.println("2. Upload data to cloud storage and get a link.");

@@ -1,10 +1,11 @@
 package CreationAndMetaData;
 import Database.MongoDBSingleton;
+import Events.ChangeStatusEvent;
 import Events.CreationCollectEvent;
 import MessageQueue.MockQueue;
+import com.google.common.eventbus.Subscribe;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.result.UpdateResult;
 import iam.UserProfile;
 import org.bson.Document;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class DataCreation implements IDataCreation {
             throw new RuntimeException(e);
         }
     }
-    public boolean completePendingStatus(String userName) {
+    private void completePendingStatus(String userName) {
         try {
 
             MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyColection");
@@ -51,16 +52,14 @@ public class DataCreation implements IDataCreation {
             Document document=dbSingleton.checkUserProfileInMongo(collection,userName);
             Document editedDocument=new Document(document);
             if(document==null){
-                return false;
+                return;
             }
             editedDocument.put("status","Complete");
             dbSingleton.updateUserDataInMongo(collection,document,editedDocument);
 
-            return true;
         } catch (Exception e) {
             logger.error("error updating status to complete for user: " + userName, e);
         }
-        return false;
     }
     private void storeMetaData(String userName, String userType, String status) {
         try {
@@ -69,11 +68,20 @@ public class DataCreation implements IDataCreation {
                     .append("status", status);
 
             MongoCollection<Document> collection =dbSingleton.getCollection("MyBase", "MyColection");
-
+            if(userMetaIsExist(userName,collection)){
+                return;
+            }
             dbSingleton.insertNewUserDataInMongo(collection, metaData);
 
         } catch (Exception e) {
             logger.error("Error storing metadata for user: " + userName, e);
         }
+    }
+    @Subscribe
+    void handleCompleteEvent(ChangeStatusEvent changeStatusEvent) {
+        completePendingStatus(changeStatusEvent.getUserName());
+    }
+    private boolean userMetaIsExist(String userName,MongoCollection<Document> collection) {
+        return dbSingleton.checkUserProfileInMongo(collection,userName)!=null;
     }
 }
