@@ -29,11 +29,11 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
             logger.fine("Fetched user activities for UserID: " + userId);
 
             UserActivity existingActivity = getUserActivity(userActivities, activityId);
+
             if (existingActivity == null) {
 
                 logger.warning("Activity with ID: " + activityId + " not found for UserID: " + userId);
                 throw new NotFoundException("Activity not found with ID: " + activityId);
-
             }
 
             userActivities.remove(existingActivity);
@@ -60,6 +60,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
                 return userActivity;
             }
         }
+
         logger.fine("No matching activity found with ID: " + activityId);
         return null;
     }
@@ -95,6 +96,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
     void handleDeleteEvent(DeleteEvent deleteEvent) throws SystemBusyException, BadRequestException, NotFoundException {
         logger.info("Handling delete event for UserName: " + deleteEvent.getUserName()+"on user activity service");
         try {
+
             List<UserActivity> userActivities = getUserActivity(deleteEvent.getUserName());
             logger.fine("Fetched user activities for UserName: " + deleteEvent.getUserName());
 
@@ -106,10 +108,12 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
             userActivities.clear();
             EventHandlerMethods.handleUserDataEvent("userActivity", new Object(), deleteEvent.getUserName());
             logger.info("User activities cleared and delete event handled for UserName: " + deleteEvent.getUserName());
+
         } catch (SystemBusyException | BadRequestException | NotFoundException e) {
             logger.warning("Error during delete event for UserName: " + deleteEvent.getUserName() + ": " + e.getMessage());
             throw e;
         }
+
     }
 
 

@@ -1,16 +1,17 @@
 package CreationAndMetaData;
 
 import Database.MongoDBSingleton;
+import Events.ChangeStatusEvent;
 import Events.CreationCollectEvent;
 import MessageQueue.MockQueue;
 import com.mongodb.MongoException;
+import com.google.common.eventbus.Subscribe;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
 import iam.UserProfile;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.SystemBusyException;
 
@@ -46,29 +47,17 @@ public class DataCreation implements IDataCreation {
         }
     }
 
-
     @Override
     public Document getMetaData(String userName) throws NotFoundException, SystemBusyException {
+        MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyColection");
         try {
-            logger.info("Retrieving metadata for UserName: " + userName);
-            MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyCollection");
-            Document doc = collection.find(Filters.eq("userName", userName)).first();
-
-            if (doc == null) {
-                logger.warn("Metadata not found for UserName: " + userName);
-                throw new NotFoundException("Metadata not found for user: " + userName);
-            }
-
-            logger.info("Successfully retrieved metadata for UserName: " + userName);
-            return doc;
-        } catch (MongoException e) {
-            logger.error("MongoDB error while retrieving metadata for UserName: " + userName, e);
-            throw new SystemBusyException("Database operation failed while retrieving metadata: " + e.getMessage());
+            return collection.find(Filters.eq("userName", userName)).first();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-
-    public boolean completePendingStatus(String userName) throws NotFoundException, SystemBusyException {
+    public void completePendingStatus(String userName) throws NotFoundException, SystemBusyException {
         try {
             logger.info("Updating user status to 'Complete' for UserName: " + userName);
             MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyCollection");
@@ -84,7 +73,7 @@ public class DataCreation implements IDataCreation {
             dbSingleton.updateUserDataInMongo(collection, document, editedDocument);
 
             logger.info("User status updated to 'Complete' for UserName: " + userName);
-            return true;
+
         } catch (MongoException e) {
             logger.error("MongoDB error while updating user status for UserName: " + userName, e);
             throw new SystemBusyException("Database operation failed while updating status: " + e.getMessage());
@@ -99,13 +88,25 @@ public class DataCreation implements IDataCreation {
                     .append("status", status);
 
             MongoCollection<Document> collection = dbSingleton.getCollection("MyBase", "MyCollection");
+            if(userMetaIsExist(userName,collection)){
+                return;
+            }
             dbSingleton.insertNewUserDataInMongo(collection, metaData);
 
             logger.info("Metadata stored successfully for UserName: " + userName);
         } catch (MongoException e) {
             logger.error("MongoDB error while storing metadata for UserName: " + userName, e);
             throw new SystemBusyException("Database operation failed while storing metadata: " + e.getMessage());
+        } catch (NotFoundException e) {
+            throw new RuntimeException(e);
         }
+    }
+    @Subscribe
+    void handleCompleteEvent(ChangeStatusEvent changeStatusEvent) throws SystemBusyException, NotFoundException {
+        completePendingStatus(changeStatusEvent.getUserName());
+    }
+    private boolean userMetaIsExist(String userName,MongoCollection<Document> collection) throws SystemBusyException, NotFoundException {
+        return dbSingleton.checkUserProfileInMongo(collection,userName)!=null;
     }
 
 }
