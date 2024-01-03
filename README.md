@@ -1,7 +1,9 @@
 # advance-final-project
 
--- i decided to use simulate to event driven architicture based on 
+-- i decided to use simulate to event driven architicture based on :
+
 a - copling between component 
+
 b - needing of realtime updates 
 
 1- collectdata logic - when user request to collect data the creation and meta data service publich event using Google Guava EventBus library (publish and subscriber library to simulate event driven architecture ) 
