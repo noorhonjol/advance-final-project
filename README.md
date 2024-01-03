@@ -1,16 +1,23 @@
 # advance-final-project
 
+-- i decided to use simulate to event driven architicture based on 
+a - copling between component 
+b - needing of realtime updates 
+
+1- collectdata logic - when user request to collect data the creation and meta data service publich event using Google Guava EventBus library (publish and subscriber library to simulate event driven architecture ) 
+  the subscriber (services that i want to get from it) that publish another type of event to DataCollect Service that contain the data i want to save it .
+
+2- using decorater desgin pattern on services to extend the functionalities of a exisited functionalities and then create Event driven services that add the event type behavior .
+
+3 - delete logic - user send user name and delete type to data delete service that send event contain provided data to each services i want to delete from it and then save the user name to ensure that user cant make new user with same user name.
+
+4 - use singelton pattern in Mock queue and mongo database to enhance performance and memory mangment .
 
 
 
-
-
-
-
-![main](https://github.com/noorhonjol/advance-final-project/assets/29591992/44fc1646-e4e6-4b89-98d3-2a4042b45097)
 https://drive.google.com/file/d/1II7-g0kauuiraxnczONIgaKQ7_fHPV1x/view?usp=sharing
 
-
+![main](https://github.com/noorhonjol/advance-final-project/assets/29591992/44fc1646-e4e6-4b89-98d3-2a4042b45097)
 
 ![systemContext](https://github.com/noorhonjol/advance-final-project/assets/29591992/0ff4dadf-f182-40b3-a8cd-34f03a4b3f49)
 
