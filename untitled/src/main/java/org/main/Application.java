@@ -11,6 +11,7 @@ import activity.UserActivityService;
 import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.SystemBusyException;
+import exceptions.Util;
 import iam.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +42,31 @@ public class Application {
         logger.info("Application Started: ");
         Instant start = Instant.now();
         System.out.println("Application Started: " + start);
+        int maxAttempts = 3;
+        int attempt = 0;
+        boolean success = false;
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your username: ");
-        System.out.println("Note: You can use any of the following usernames: user0, user1, user2, user3, .... user99");
-        String userName = scanner.nextLine();
-        setLoginUserName(userName);
+        while (attempt < maxAttempts && !success) {
+            try {
+                System.out.println("Enter your username: ");
+                System.out.println("Note: You can use any of the following usernames: user0, user1, user2, user3, .... user99");
+                String userName = scanner.nextLine();
+                Util.validateUserName(userName);
+                setLoginUserName(userName);
+                success = true;
+
+            } catch (SystemBusyException e) {
+                System.out.println("System is busy, please try again.");
+                attempt++;
+            } catch (BadRequestException e) {
+                System.out.println("Bad request: " + e.getMessage());
+                break;
+            }
+        }
+        if (!success) {
+            System.out.println("Failed to process after " + maxAttempts + " attempts.");
+            return;
+        }
         //TODO Your application starts here. Do not Change the existing code
 
 
