@@ -20,14 +20,19 @@ public class DataCreation implements IDataCreation {
     private final MongoDBSingleton dbSingleton = MongoDBSingleton.getInstance();
 
     @Override
-    public void requestToCollectData(UserProfile userProfile) throws BadRequestException, SystemBusyException {
-        if (userProfile == null || userProfile.getUserName() == null || userProfile.getUserType() == null) {
-            throw new BadRequestException("Invalid user profile data");
+    public void requestToCollectData(UserProfile userProfile) {
+        try {
+            String userName = userProfile.getUserName();
+            String userType = String.valueOf(userProfile.getUserType());
+            storeMetaData(userName, userType, "Pending");
+            messageQueue.produce(new CreationCollectEvent(userName, userProfile.getUserType()));
+        } catch (MongoException me) {
+            logger.error("MongoDB error during data collection for user: " + userProfile.getUserName(), me);
+        } catch (Exception e) {
+            logger.error("General error during data collection for user: " + userProfile.getUserName(), e);
         }
-        storeMetaData(userProfile.getUserName(), String.valueOf(userProfile.getUserType()), "Pending");
-        messageQueue.produce(new CreationCollectEvent(userProfile.getUserName(), userProfile.getUserType()));
-        logger.info("Data collection request initiated for user: " + userProfile.getUserName());
     }
+
 
     @Override
     public Document getMetaData(String userName) throws NotFoundException, SystemBusyException {
