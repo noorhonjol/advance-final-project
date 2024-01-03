@@ -64,13 +64,22 @@ public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
         }
     }
     @Subscribe
-    void handleUserAddEvent(AddUserEvent userEvent) throws SystemBusyException, NotFoundException, BadRequestException {
+    void handleUserAddEvent(AddUserEvent userEvent) {
+
+        String userName = userEvent.getUserProfile().getUserName();
+
+        logger.info("Handling AddUserEvent for user: " + userName);
+
 
         userService.addUser(userEvent.getUserProfile());
+        logger.info("User successfully added: " + userName);
 
-        EventHandlerMethods.handleUserDataEvent("user-profile",userEvent.getUserProfile(),userEvent.getUserProfile().getUserName());
+        EventHandlerMethods.handleUserDataEvent("user-profile", userEvent.getUserProfile(), userName);
+
+        logger.info("UserDataEvent handled for user: " + userName);
 
     }
+
 
 
 }
