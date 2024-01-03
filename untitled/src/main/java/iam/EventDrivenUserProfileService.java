@@ -1,5 +1,6 @@
 package iam;
 
+import Events.AddUserEvent;
 import Events.CreationCollectEvent;
 //import Events.DeleteEvent;
 import Events.DeleteEvent;
@@ -33,6 +34,14 @@ public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
         }
         deleteUser(deleteEvent.getUserName());
         EventHandlerMethods.handleUserDataEvent("user-profile",new Object(),deleteEvent.getUserName());
+    }
+    @Subscribe
+    void handleUserAddEvent(AddUserEvent userEvent) throws SystemBusyException, NotFoundException, BadRequestException {
+
+        userService.addUser(userEvent.getUserProfile());
+
+        EventHandlerMethods.handleUserDataEvent("user-profile",userEvent.getUserProfile(),userEvent.getUserProfile().getUserName());
+
     }
 
 }

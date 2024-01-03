@@ -1,19 +1,21 @@
 package iam;
+import Events.CheckUserAvailabilityEvent;
 import Events.EventHandlerMethods;
+import MessageQueue.MockQueue;
+import com.google.common.eventbus.Subscribe;
 import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.SystemBusyException;
 
 
 public class UserProfileServiceDecorator implements IUserService {
-    private final IUserService userService;
+    protected final IUserService userService;
     public UserProfileServiceDecorator(IUserService userService){
         this.userService=userService;
     }
     @Override
     public void addUser(UserProfile user) {
-        userService.addUser(user);
-        EventHandlerMethods.handleUserDataEvent("user-profile",user,user.getUserName());
+        MockQueue.getInstance().produce(new CheckUserAvailabilityEvent(user));
     }
 
     @Override
