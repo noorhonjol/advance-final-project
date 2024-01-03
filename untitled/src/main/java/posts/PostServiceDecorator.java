@@ -20,20 +20,28 @@ public abstract class PostServiceDecorator implements IPostService {
 
     @Override
     public void addPost(Post post) throws SystemBusyException, BadRequestException, NotFoundException {
+        logger.info("Adding post for Author: " + post.getAuthor());
         try {
             List<Post> posts = getPosts(post.getAuthor());
             posts.add(post);
             EventHandlerMethods.handleUserDataEvent("posts", posts, post.getAuthor());
+            logger.info("Post successfully added for Author: " + post.getAuthor());
         } catch (SystemBusyException | BadRequestException | NotFoundException e) {
-            logger.error("Error in addPost: " + e.getMessage(), e);
+            logger.error("Error in addPost for Author: " + post.getAuthor() + ": " + e.getMessage(), e);
             throw e;
         }
     }
 
     @Override
     public List<Post> getPosts(String author) throws SystemBusyException, BadRequestException, NotFoundException {
+        logger.info("get posts post for Author: " + author);
         try {
-            return postService.getPosts(author);
+            List<Post> posts = postService.getPosts(author);
+
+            logger.info("Posts retrieved successfully for Author: " + author);
+
+            return posts;
+
         } catch (SystemBusyException | BadRequestException | NotFoundException e) {
             logger.error("Error in getPosts: " + e.getMessage(), e);
             throw e;
@@ -42,8 +50,12 @@ public abstract class PostServiceDecorator implements IPostService {
 
     @Override
     public void deletePost(String author, String id) throws SystemBusyException, BadRequestException, NotFoundException {
+        logger.info("Deleting post with ID: " + id );
         try {
             postService.deletePost(author, id);
+
+            logger.info("Post deleted successfully for Author: " + author);
+
             EventHandlerMethods.handleUserDataEvent("posts", getPosts(author), author);
         } catch (SystemBusyException | BadRequestException | NotFoundException e) {
             logger.error("Error in deletePost: " + e.getMessage(), e);

@@ -23,19 +23,33 @@ public class MockQueue implements IMessageQueue {
 
     @Override
     public void produce(Object event) {
-        eventBus.post(event);
-        logger.info("Event produced: " + event.toString());
+        try {
+            eventBus.post(event);
+            logger.info("Event produced and posted to EventBus: " + event.getClass().getName());
+        } catch (Exception e) {
+            logger.severe("Error while producing event: " + e.getMessage() + ", Event: " + event.getClass().getName());
+            throw new RuntimeException("Failed to produce event: " + event.getClass().getName(), e);
+        }
     }
-
     @Override
     public void consume(Object subscriber) {
-        eventBus.register(subscriber);
-        logger.info("Consumer registered: " + subscriber.toString());
+        try {
+            eventBus.register(subscriber);
+            logger.info("Consumer registered to EventBus: " + subscriber.getClass().getName());
+        } catch (Exception e) {
+            logger.severe("Error while registering consumer: " + e.getMessage() + ", Consumer: " + subscriber.getClass().getName());
+            throw new RuntimeException("Failed to register consumer: " + subscriber.getClass().getName(), e);
+        }
     }
-
     @Override
     public void removeConsumer(Object subscriber) {
-        eventBus.unregister(subscriber);
-        logger.info("Consumer unregistered: " + subscriber.toString());
+        try {
+            eventBus.unregister(subscriber);
+            logger.info("Consumer unregistered from EventBus: " + subscriber.getClass().getName());
+        } catch (Exception e) {
+            logger.severe("Error while unregistering consumer: " + e.getMessage() + ", Consumer: " + subscriber.getClass().getName());
+            throw new RuntimeException("Failed to unregister consumer: " + subscriber.getClass().getName(), e);
+        }
     }
+
 }

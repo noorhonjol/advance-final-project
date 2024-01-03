@@ -17,38 +17,52 @@ public abstract class UserActivityServiceDecorator implements IUserActivityServi
 
     @Override
     public void addUserActivity(UserActivity userActivity) throws SystemBusyException, BadRequestException, NotFoundException {
+        logger.info("Adding user activity for UserID: " + userActivity.getUserId());
         try {
-            if (userActivity == null || userActivity.getUserId() == null || userActivity.getActivityType() == null) {
-                throw new BadRequestException("user activity, user ID, and activity type must not be null");
-            }
             userActivityService.addUserActivity(userActivity);
+            logger.fine("User activity added. Now handling user data event.");
+
             EventHandlerMethods.handleUserDataEvent("userActivity", getUserActivity(userActivity.getUserId()), userActivity.getUserId());
+            logger.info("User data event handled successfully for UserID: " + userActivity.getUserId());
+
         } catch (BadRequestException | SystemBusyException | NotFoundException e) {
-            logger.warning("Error during adding user activity: " + e.getMessage());
+            logger.warning("Error during adding user activity for UserID: " + userActivity.getUserId() + ": " + e.getMessage());
             throw e;
         }
     }
 
     @Override
     public List<UserActivity> getUserActivity(String userId) throws SystemBusyException, BadRequestException, NotFoundException {
+        logger.info("Fetching user activities for UserID: " + userId);
         try {
-            return userActivityService.getUserActivity(userId);
+            List<UserActivity> activities = userActivityService.getUserActivity(userId);
+            logger.info("Successfully fetched user activities for UserID: " + userId);
+            return activities;
+
         } catch (BadRequestException | SystemBusyException | NotFoundException e) {
-            logger.warning("Error during getting user activity: " + e.getMessage());
+            logger.warning("Error during getting user activity for UserID: " + userId + ": " + e.getMessage());
             throw e;
         }
     }
 
+
     @Override
     public void removeUserActivity(String userId, String id) throws SystemBusyException, BadRequestException, NotFoundException {
+        logger.info("Removing user activity for UserID: " + userId + ", ActivityID: " + id);
         try {
             userActivityService.removeUserActivity(userId, id);
+
+            logger.fine("User activity removed. Now handling user data event.");
+
             EventHandlerMethods.handleUserDataEvent("userActivity", getUserActivity(userId), userId);
+            logger.info("User data event handled successfully after removing activity for UserID: " + userId);
+
         } catch (BadRequestException | SystemBusyException | NotFoundException e) {
-            logger.warning("Error during removing user activity: " + e.getMessage());
+            logger.warning("Error during removing user activity for UserID: " + userId + ", ActivityID: " + id + ": " + e.getMessage());
             throw e;
         }
     }
+
 
     abstract void update(String userId, String activityId, UserActivity newData) throws SystemBusyException, BadRequestException, NotFoundException;
 }
