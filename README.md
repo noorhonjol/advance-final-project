@@ -15,7 +15,11 @@ b - needing of realtime updates
 
 4 - use singelton pattern in Mock queue and mongo database to enhance performance and memory mangment .
 
+5 - use Templete Pattern in  PDF Convertor because in each ServiceType the format of the PDF could be different, we used a laibrary to convert files to PDF
 
+6 - Facotory Pattern to change between ServiceType and return convertor for each service also this allows flexibility in adding Service Types
+
+7 - use Factory Pattern for CloudStorage for flexibility to add different Storages, using GoogleDrive Java Documentation to upload the ZIP file to the cloud 
 
 https://drive.google.com/file/d/1II7-g0kauuiraxnczONIgaKQ7_fHPV1x/view?usp=sharing
 
