@@ -5,6 +5,8 @@ import DataExport.DocumentToPdf.PdfConvertTemplete;
 import DataExport.PdfFactoryConvertor.PdfFactoryConvertor;
 import DataExport.Storage.StorageFactory;
 import DataExport.Storage.StorageService;
+import exceptions.NotFoundException;
+import exceptions.SystemBusyException;
 import org.bson.Document;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -25,7 +27,7 @@ public class DataExport implements IDataExport {
     }
     List<File> pdfFiles = new ArrayList<>();
     @Override
-    public String getPathOfProcessedData(String userName) {
+    public String getPathOfProcessedData(String userName) throws SystemBusyException, NotFoundException {
         logger.info("Starting data export for user: " + userName);
         Document metaData = getMetaData(userName);
         if (metaData == null) {
@@ -86,7 +88,7 @@ public class DataExport implements IDataExport {
         }
         return null;
     }
-    private Document getMetaData(String userName) {
+    private Document getMetaData(String userName) throws SystemBusyException, NotFoundException {
         logger.info("Getting metadata for user: " + userName);
         Document metaData = dataCreation.getMetaData(userName);
         logger.info("Metadata retrieved for user: " + userName);
