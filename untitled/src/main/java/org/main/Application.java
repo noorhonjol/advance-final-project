@@ -11,7 +11,6 @@ import activity.UserActivityService;
 import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.SystemBusyException;
-import exceptions.Util;
 import iam.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,99 +22,84 @@ import posts.*;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Scanner;
-
 import java.util.concurrent.TimeoutException;
 
 public class Application {
 
     private static final IUserActivityService userActivityService = new UserActivityService();
-    private static final IPayment paymentService =  new PaymentService();
+    private static final IPayment paymentService = new PaymentService();
     private static final IUserService userService = new UserService();
     private static final IPostService postService = new PostService();
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private static String loginUserName;
 
+
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, SystemBusyException, NotFoundException, BadRequestException {
-        try {
-            logger.info("Application Started at {}", Instant.now());
-            generateRandomData();
+        generateRandomData();
 
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Enter your username: ");
-            String userName = scanner.nextLine();
-            boolean isValidated = false;
-            int retryCount = 0;
 
-            while (!isValidated && retryCount < 3) {
-                try {
-                    Util.validateUserName(userName);
-                    isValidated = true;
-                    setLoginUserName(userName);
-                } catch (BadRequestException e) {
-                    logger.error("Error in username validation: {}", e.getMessage());
-                    return;
-                } catch (SystemBusyException e) {
-                    retryCount++;
-                    if (retryCount >= 3) {
-                        logger.error("System is busy. Please try again later.");
-                        return;
-                    }
-                    logger.info("System is busy, retrying... (Attempt {})", retryCount);
-                }
-            }
+        logger.info("Application Started: ");
+        Instant start = Instant.now();
+        System.out.println("Application Started: " + start);
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter your username: ");
+        System.out.println("Note: You can use any of the following usernames: user0, user1, user2, user3, .... user99");
+        String userName = scanner.nextLine();
+        setLoginUserName(userName);
+        //TODO Your application starts here. Do not Change the existing code
 
-            var paymentServiceWithEvent = new EventDrivenPaymentService(paymentService);
-            var postServiceWithEvent = new EventDrivenPostService(postService);
-            var userServiceWithEvent = new EventDrivenUserProfileService(userService);
-            var activityServiceWithEvent = new EventDrivenUserActivityService(userActivityService);
 
-            var creation = new DataCreation();
-            var dataCollector = new DataCollect();
-            IMessageQueue messageQueue = MockQueue.getInstance();
-            messageQueue.consume(paymentServiceWithEvent);
-            messageQueue.consume(postServiceWithEvent);
-            messageQueue.consume(userServiceWithEvent);
-            messageQueue.consume(activityServiceWithEvent);
-            messageQueue.consume(dataCollector);
-            messageQueue.consume(creation);
 
-            creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
+        var paymentServiceWithEvent=new EventDrivenPaymentService(paymentService);
+        var postServiceWithEvent=new EventDrivenPostService(postService);
+        var userServiceWithEvent=new EventDrivenUserProfileService(userService);
+        var activityServiceWithEvent=new EventDrivenUserActivityService(userActivityService);
 
-            System.out.println("How do you want to get your Data:");
-            System.out.println("1. Export data and download directly");
-            System.out.println("2. Upload data to cloud storage and get a link.");
-            System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
+        var creation =new DataCreation();
 
-            long startTime = System.currentTimeMillis();
-            DataCollect dataCollect = new DataCollect();
-            DataExport dataExport = new DataExport(dataCollect);
-            try {
-                switch (choice) {
-                    case 1:
-                        String fileName = dataExport.getPathOfProcessedData(getLoginUserName());
-                        System.out.println("Data exported to file: " + fileName);
-                        break;
-                    case 2:
-                        String cloudLink = dataExport.exportAndUploadData(getLoginUserName(), "GoogleDrive");
-                        System.out.println("Data uploaded to cloud. This is the Link: " + cloudLink);
-                        break;
-                    default:
-                        System.out.println("Invalid choice.");
-                }
-            } catch (Exception e) {
-                logger.error("Error during data export: {}", e.getMessage());
-            }
+        var dataCollector=new DataCollect();
 
-            long endTime = System.currentTimeMillis();
-            logger.info("Data export for user completed in {} ms", (endTime - startTime));
+        IMessageQueue messageQueue= MockQueue.getInstance();
+        messageQueue.consume(paymentServiceWithEvent);
+        messageQueue.consume(postServiceWithEvent);
+        messageQueue.consume(userServiceWithEvent);
+        messageQueue.consume(activityServiceWithEvent);
+        messageQueue.consume(dataCollector);
+        messageQueue.consume(creation);
 
-            logger.info("Application Ended at {}", Instant.now());
-        } catch (Exception e) {
-            logger.error("An unexpected error occurred: {}", e.getMessage());
+        creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
+
+
+        System.out.println("How do you want to get your Data:");
+        System.out.println("1. Export data and download directly");
+        System.out.println("2. Upload data to cloud storage and get a link.");
+        System.out.print("Enter your choice: ");
+        int choice = scanner.nextInt();
+        long startTime = System.currentTimeMillis();
+
+        DataCollect dataCollect = new DataCollect();
+        DataExport dataExport=new DataExport(dataCollect);
+        switch (choice) {
+            case 1:
+                String fileName = dataExport.getPathOfProcessedData(getLoginUserName());
+                System.out.println("Data exported to file: " + fileName);
+                break;
+            case 2:
+                String cloudLink = dataExport.exportAndUploadData(getLoginUserName(), "GoogleDrive");
+                System.out.println("Data uploaded to cloud. This is the Link: " + cloudLink);
+                break;
+            default:
+                System.out.println("Invalid choice.");
         }
-    }
+        long endTime = System.currentTimeMillis();
+        logger.info("Data export for user completed in {} ms", (endTime - startTime));
 
+
+
+        //TODO Your application ends here. Do not Change the existing code
+
+        logger.info("Application Ended: ");
+    }
     private static void generateRandomData() {
         for (int i = 0; i < 100; i++) {
             generateUser(i);
@@ -181,7 +165,6 @@ public class Application {
             return UserType.PREMIUM_USER;
         }
     }
-
     public static String getLoginUserName() {
         return loginUserName;
     }
@@ -189,4 +172,5 @@ public class Application {
     private static void setLoginUserName(String loginUserName) {
         Application.loginUserName = loginUserName;
     }
+
 }
