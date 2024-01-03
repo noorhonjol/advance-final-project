@@ -1,5 +1,7 @@
 package iam;
+import Events.CheckUserAvailabilityEvent;
 import Events.EventHandlerMethods;
+import MessageQueue.MockQueue;
 import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.SystemBusyException;
@@ -8,22 +10,15 @@ import org.slf4j.LoggerFactory;
 
 
 public class UserProfileServiceDecorator implements IUserService {
-    private final IUserService userService;
-    private static final Logger logger = LoggerFactory.getLogger(EventDrivenUserProfileService.class);
+    protected final IUserService userService;
 
+    private static final Logger logger = LoggerFactory.getLogger(EventDrivenUserProfileService.class);
     public UserProfileServiceDecorator(IUserService userService){
         this.userService=userService;
     }
     @Override
     public void addUser(UserProfile user) {
-        try {
-            userService.addUser(user);
-            EventHandlerMethods.handleUserDataEvent("user-profile", user, user.getUserName());
-            logger.info("User added successfully: " + user.getUserName());
-        } catch (Exception e) {
-            logger.error("Error while adding user: " + user.getUserName(), e);
-            throw new RuntimeException("Failed to add user: " + user.getUserName(), e);
-        }
+        MockQueue.getInstance().produce(new CheckUserAvailabilityEvent(user));
     }
 
     @Override

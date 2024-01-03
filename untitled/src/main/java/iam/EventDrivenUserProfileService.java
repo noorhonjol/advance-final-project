@@ -1,5 +1,6 @@
 package iam;
 
+import Events.AddUserEvent;
 import Events.CreationCollectEvent;
 import Events.DeleteEvent;
 import Events.EventHandlerMethods;
@@ -62,6 +63,23 @@ public class EventDrivenUserProfileService extends UserProfileServiceDecorator {
             throw new RuntimeException("Unexpected error during handleDeleteEvent: " + e.getMessage(), e);
         }
     }
+    @Subscribe
+    void handleUserAddEvent(AddUserEvent userEvent) {
+
+        String userName = userEvent.getUserProfile().getUserName();
+
+        logger.info("Handling AddUserEvent for user: " + userName);
+
+
+        userService.addUser(userEvent.getUserProfile());
+        logger.info("User successfully added: " + userName);
+
+        EventHandlerMethods.handleUserDataEvent("user-profile", userEvent.getUserProfile(), userName);
+
+        logger.info("UserDataEvent handled for user: " + userName);
+
+    }
+
 
 
 }
