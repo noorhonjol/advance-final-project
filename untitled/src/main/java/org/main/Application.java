@@ -8,6 +8,8 @@ import activity.EventDrivenUserActivityService;
 import activity.IUserActivityService;
 import activity.UserActivity;
 import activity.UserActivityService;
+import dataDeletion.DataDeletion;
+import dataDeletion.DeleteType;
 import exceptions.BadRequestException;
 import exceptions.NotFoundException;
 import exceptions.SystemBusyException;
@@ -34,10 +36,8 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
     private static String loginUserName;
 
-
     public static void main(String[] args) throws IOException, TimeoutException, InterruptedException, SystemBusyException, NotFoundException, BadRequestException {
         generateRandomData();
-
 
         logger.info("Application Started: ");
         Instant start = Instant.now();
@@ -69,8 +69,6 @@ public class Application {
         }
         //TODO Your application starts here. Do not Change the existing code
 
-
-
         var paymentServiceWithEvent=new EventDrivenPaymentService(paymentService);
         var postServiceWithEvent=new EventDrivenPostService(postService);
         var userServiceWithEvent=new EventDrivenUserProfileService(userService);
@@ -89,8 +87,29 @@ public class Application {
         messageQueue.consume(creation);
 
         creation.requestToCollectData(userServiceWithEvent.getUser(getLoginUserName()));
+        System.out.println("How do you want to delete your data:");
+        System.out.println("1. Soft delete ");
+        System.out.println("2. Hard delete ");
+        System.out.print("Enter your choice: ");
+        int deleteChoice = scanner.nextInt();
 
+        DataDeletion dataDeletion = new DataDeletion();
 
+        switch (deleteChoice) {
+            case 1:
+                logger.info("User chose soft delete for user: {}", getLoginUserName());
+                dataDeletion.deleteData(getLoginUserName(), DeleteType.soft);
+                System.out.println("Soft delete initiated for user: " + getLoginUserName());
+                break;
+            case 2:
+                logger.info("User chose hard delete for user: {}", getLoginUserName());
+                dataDeletion.deleteData(getLoginUserName(), DeleteType.hard);
+                System.out.println("Hard delete initiated for user: " + getLoginUserName());
+                break;
+            default:
+                logger.warn("User made an invalid choice for data deletion");
+                System.out.println("Invalid choice.");
+        }
         System.out.println("How do you want to get your Data:");
         System.out.println("1. Export data and download directly");
         System.out.println("2. Upload data to cloud storage and get a link.");
@@ -102,14 +121,17 @@ public class Application {
         DataExport dataExport=new DataExport(dataCollect);
         switch (choice) {
             case 1:
+                logger.info("User chose to export data to file for user: {}", getLoginUserName());
                 String fileName = dataExport.getPathOfProcessedData(getLoginUserName());
                 System.out.println("Data exported to file: " + fileName);
                 break;
             case 2:
+                logger.info("User chose to upload data to cloud for user: {}", getLoginUserName());
                 String cloudLink = dataExport.exportAndUploadData(getLoginUserName(), "GoogleDrive");
                 System.out.println("Data uploaded to cloud. This is the Link: " + cloudLink);
                 break;
             default:
+                logger.warn("User made an invalid choice");
                 System.out.println("Invalid choice.");
         }
         long endTime = System.currentTimeMillis();
