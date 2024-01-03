@@ -21,6 +21,8 @@ b - needing of realtime updates
 
 7 - use Factory Pattern for CloudStorage for flexibility to add different Storages, using GoogleDrive Java Documentation to upload the ZIP file to the cloud 
 
+8-DataCreation logic -  handles the orchestration of user data collection processes, including managing metadata in a MongoDB database and interfacing with a message queue system. It ensures efficient tracking and updating of user statuses during data collection
+
 https://drive.google.com/file/d/1II7-g0kauuiraxnczONIgaKQ7_fHPV1x/view?usp=sharing
 
 ![main](https://github.com/noorhonjol/advance-final-project/assets/29591992/44fc1646-e4e6-4b89-98d3-2a4042b45097)
