@@ -81,7 +81,7 @@ public class DataExport implements IDataExport {
             return FileStorageLink;
         } catch (IOException e) {
             logger.error("IO Exception happened {}", e.getMessage());
-        } catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException | SystemBusyException | NotFoundException e) {
             logger.error("Security Exception happened {}", e.getMessage());
         }catch(IllegalArgumentException e){
             logger.error("Illegal Argument Exception Exception happened {} Service type Not supported", e.getMessage());
