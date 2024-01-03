@@ -41,7 +41,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
 
             logger.fine("Replaced old activity with new data for UserID: " + userId);
 
-            EventHandlerMethods.handleUserDataEvent("userActivity", userActivities, userId);
+            EventHandlerMethods.handleUserDataEvent("userActivities", userActivities, userId);
 
             logger.info("User activity update event handled successfully for UserID: " + userId);
 
@@ -72,7 +72,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
 
         try {
             if (collectEvent.getUserType() == UserType.NEW_USER) {
-                EventHandlerMethods.handleUserDataEvent("userActivity", new Object(), collectEvent.getUserName());
+                EventHandlerMethods.handleUserDataEvent("userActivities", new Object(), collectEvent.getUserName());
                 logger.info("Handled data event for new user: " + collectEvent.getUserName());
                 return;
             }
@@ -84,7 +84,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
                 throw new NotFoundException("No activities found for user: " + collectEvent.getUserName());
             }
 
-            EventHandlerMethods.handleUserDataEvent("userActivity", userActivities, collectEvent.getUserName());
+            EventHandlerMethods.handleUserDataEvent("userActivities", userActivities, collectEvent.getUserName());
             logger.info("Data collection event handled successfully for UserName: " + collectEvent.getUserName());
         } catch (SystemBusyException | BadRequestException | NotFoundException e) {
             logger.warning("Error during data collection event for UserName: " + collectEvent.getUserName() + ": " + e.getMessage());
@@ -106,7 +106,7 @@ public class EventDrivenUserActivityService extends UserActivityServiceDecorator
             }
 
             userActivities.clear();
-            EventHandlerMethods.handleUserDataEvent("userActivity", new Object(), deleteEvent.getUserName());
+            EventHandlerMethods.handleUserDataEvent("userActivities", new Object(), deleteEvent.getUserName());
             logger.info("User activities cleared and delete event handled for UserName: " + deleteEvent.getUserName());
 
         } catch (SystemBusyException | BadRequestException | NotFoundException e) {

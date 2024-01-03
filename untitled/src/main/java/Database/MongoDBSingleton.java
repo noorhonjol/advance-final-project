@@ -52,10 +52,6 @@ public class MongoDBSingleton implements IDataBase {
         logger.info("Checking user profile in MongoDB for UserName: " + userName);
         try {
             Document document = collection.find(Filters.eq("userName", userName)).first();
-            if (document == null) {
-                logger.warning("User not found in MongoDB: " + userName);
-                throw new NotFoundException("User not found: " + userName);
-            }
             logger.fine("User profile found in MongoDB for UserName: " + userName);
             return document;
         } catch (MongoException e) {

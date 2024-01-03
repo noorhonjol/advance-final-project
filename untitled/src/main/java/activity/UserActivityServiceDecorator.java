@@ -22,7 +22,7 @@ public abstract class UserActivityServiceDecorator implements IUserActivityServi
             userActivityService.addUserActivity(userActivity);
             logger.fine("User activity added. Now handling user data event.");
 
-            EventHandlerMethods.handleUserDataEvent("userActivity", getUserActivity(userActivity.getUserId()), userActivity.getUserId());
+            EventHandlerMethods.handleUserDataEvent("userActivities", getUserActivity(userActivity.getUserId()), userActivity.getUserId());
             logger.info("User data event handled successfully for UserID: " + userActivity.getUserId());
 
         } catch (BadRequestException | SystemBusyException | NotFoundException e) {
@@ -54,7 +54,7 @@ public abstract class UserActivityServiceDecorator implements IUserActivityServi
 
             logger.fine("User activity removed. Now handling user data event.");
 
-            EventHandlerMethods.handleUserDataEvent("userActivity", getUserActivity(userId), userId);
+            EventHandlerMethods.handleUserDataEvent("userActivities", getUserActivity(userId), userId);
             logger.info("User data event handled successfully after removing activity for UserID: " + userId);
 
         } catch (BadRequestException | SystemBusyException | NotFoundException e) {
